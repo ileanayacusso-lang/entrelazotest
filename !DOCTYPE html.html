@@ -1,0 +1,2474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Plataforma Segura · Reportes Confidenciales</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════════════
+   DESIGN TOKENS — WCAG AA compliant, trauma-informed palette
+   ═══════════════════════════════════════════════════════ */
+:root {
+  /* Backgrounds — soft neutral, never pure black */
+  --bg:         #F4F6F8;
+  --bg-alt:     #EDF0F3;
+  --surface:    #FFFFFF;
+  --surface2:   #F8FAFB;
+  --sidebar-bg: #1E2A3A;
+  --sidebar-bg2:#253447;
+
+  /* Borders */
+  --border:     #D8E0E8;
+  --border-focus: #5B87C5;
+
+  /* Text — high contrast */
+  --text:       #1A2332;
+  --text-secondary: #4A5568;
+  --text-muted: #718096;
+  --text-sidebar: #C8D8E8;
+  --text-sidebar-muted: #7A9BB8;
+
+  /* Accent — calm blue (trust, calm) */
+  --accent:       #3D6FA8;
+  --accent-hover: #2D5A8E;
+  --accent-light: #EBF2FB;
+  --accent-mid:   #7AAEDD;
+
+  /* States */
+  --success:     #2D7A5A;
+  --success-bg:  #EBF7F2;
+  --success-border: #A8D8C0;
+
+  --info:        #2A6A9E;
+  --info-bg:     #EBF4FB;
+  --info-border: #A8CDE8;
+
+  --warning:     #8A6A1E;
+  --warning-bg:  #FBF6EB;
+  --warning-border: #D8C080;
+
+  --danger:      #8A3030;
+  --danger-bg:   #FBEDED;
+  --danger-border: #D8A8A8;
+
+  /* Typography scale */
+  --text-xs:  12px;
+  --text-sm:  14px;
+  --text-base: 16px;
+  --text-lg:  18px;
+  --text-xl:  22px;
+  --text-2xl: 28px;
+  --text-3xl: 36px;
+
+  /* Spacing */
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow: 0 1px 4px rgba(30,42,58,0.08), 0 4px 16px rgba(30,42,58,0.06);
+  --shadow-md: 0 4px 12px rgba(30,42,58,0.12), 0 8px 32px rgba(30,42,58,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  font-size: var(--text-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════════════ */
+.app { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 256px;
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+}
+
+.sidebar-header {
+  padding: 28px 24px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 8px;
+}
+
+.sidebar-logo-mark {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-mid));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(61,111,168,0.4);
+}
+
+.sidebar-title {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #FFFFFF;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.sidebar-tagline {
+  font-size: 11px;
+  color: var(--text-sidebar-muted);
+  letter-spacing: 0.5px;
+}
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-sidebar-muted);
+  padding: 20px 24px 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 24px;
+  font-size: 15px;
+  color: var(--text-sidebar);
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
+  margin: 1px 0;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,0.07);
+  color: #FFFFFF;
+}
+
+.nav-item.active {
+  color: #FFFFFF;
+  background: rgba(93,155,221,0.18);
+  border-left-color: var(--accent-mid);
+}
+
+.nav-item .nav-icon {
+  font-size: 16px;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--accent);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 20px 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.alias-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.alias-dot {
+  width: 8px; height: 8px;
+  background: #4CAF8A;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(76,175,138,0.6);
+}
+
+.alias-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #FFFFFF;
+  font-weight: 500;
+}
+
+.alias-label {
+  font-size: 10px;
+  color: var(--text-sidebar-muted);
+  display: block;
+  margin-top: 2px;
+}
+
+/* Main content */
+.main {
+  margin-left: 256px;
+  flex: 1;
+  padding: 48px 52px;
+  max-width: 960px;
+}
+
+.page { display: none; }
+.page.active { display: block; animation: pageIn 0.3s ease; }
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   AUTH VIEWS
+   ═══════════════════════════════════════════════════════ */
+.auth-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #EBF2FB 0%, #F4F6F8 50%, #EDF3F0 100%);
+  position: relative;
+}
+
+.auth-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233D6FA8' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 48px 44px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  z-index: 1;
+}
+
+.auth-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 36px;
+}
+
+.auth-logo-icon {
+  width: 60px; height: 60px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-mid));
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  margin-bottom: 18px;
+  box-shadow: 0 6px 20px rgba(61,111,168,0.3);
+}
+
+.auth-logo h1 {
+  font-family: 'Lora', Georgia, serif;
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.auth-logo p {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════
+   TYPOGRAPHY
+   ═══════════════════════════════════════════════════════ */
+.page-title {
+  font-family: 'Lora', Georgia, serif;
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.page-subtitle {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  margin-bottom: 36px;
+  line-height: 1.6;
+}
+
+.section-title {
+  font-family: 'Lora', Georgia, serif;
+  font-size: var(--text-lg);
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FORM ELEMENTS — WCAG AA minimum 16px body
+   ═══════════════════════════════════════════════════════ */
+.form-group { margin-bottom: 22px; }
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  letter-spacing: 0.2px;
+}
+
+.form-label .req {
+  color: var(--accent);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.form-label .opt {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  background: var(--bg-alt);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.form-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+input[type=text], input[type=email], input[type=password],
+input[type=number], input[type=tel], select, textarea {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: var(--text-base);
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  line-height: 1.5;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(91,135,197,0.15);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10'%3E%3Cpath fill='%23718096' d='M8 10L0 0h16z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 140px;
+  line-height: 1.75;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+/* "Other" spec field — shown dynamically */
+.other-spec {
+  margin-top: 10px;
+  display: none;
+  animation: fadeIn 0.2s ease;
+}
+
+.other-spec.visible { display: block; }
+
+/* ═══════════════════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: var(--text-base);
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  border-radius: var(--radius);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  line-height: 1;
+  letter-spacing: 0.2px;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #FFFFFF;
+  border-color: var(--accent);
+}
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 4px 14px rgba(61,111,168,0.35); }
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--accent);
+  border-color: var(--border);
+}
+.btn-secondary:hover { border-color: var(--accent); background: var(--accent-light); }
+
+.btn-success {
+  background: var(--success-bg);
+  color: var(--success);
+  border-color: var(--success-border);
+}
+.btn-success:hover { background: var(--success); color: white; }
+
+.btn-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-color: var(--danger-border);
+}
+.btn-danger:hover { background: var(--danger); color: white; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: transparent;
+  padding: 8px 16px;
+}
+.btn-ghost:hover { background: var(--bg-alt); color: var(--text); }
+
+.btn-full { width: 100%; }
+
+.btn-sm { padding: 8px 18px; font-size: var(--text-sm); }
+
+/* ═══════════════════════════════════════════════════════
+   CARDS
+   ═══════════════════════════════════════════════════════ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-family: 'Lora', Georgia, serif;
+  font-size: var(--text-lg);
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ALERTS
+   ═══════════════════════════════════════════════════════ */
+.alert {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  margin-bottom: 22px;
+  border: 1.5px solid;
+}
+
+.alert-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+.alert-info { background: var(--info-bg); border-color: var(--info-border); color: var(--info); }
+.alert-success { background: var(--success-bg); border-color: var(--success-border); color: var(--success); }
+.alert-warning { background: var(--warning-bg); border-color: var(--warning-border); color: var(--warning); }
+.alert-danger { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger); }
+
+.alert strong { font-weight: 600; }
+
+/* ═══════════════════════════════════════════════════════
+   FORM SECTIONS
+   ═══════════════════════════════════════════════════════ */
+.form-section {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+
+.form-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.form-section-icon {
+  width: 36px; height: 36px;
+  background: var(--accent-light);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.form-section-label {
+  font-family: 'Lora', Georgia, serif;
+  font-size: var(--text-lg);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.form-section-desc {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Encrypted field */
+.encrypted-wrap { position: relative; }
+.encrypted-wrap textarea { padding-right: 48px; }
+.enc-badge {
+  position: absolute;
+  top: 12px; right: 12px;
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--success);
+  font-family: 'JetBrains Mono', monospace;
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   STATS GRID
+   ═══════════════════════════════════════════════════════ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  box-shadow: var(--shadow);
+}
+
+.stat-value {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 40px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BADGES
+   ═══════════════════════════════════════════════════════ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  border: 1.5px solid;
+  white-space: nowrap;
+}
+
+.badge-pending  { background: var(--warning-bg);  color: var(--warning);  border-color: var(--warning-border); }
+.badge-approved { background: var(--success-bg);  color: var(--success);  border-color: var(--success-border); }
+.badge-rejected { background: var(--danger-bg);   color: var(--danger);   border-color: var(--danger-border); }
+.badge-encrypted{ background: var(--info-bg);     color: var(--info);     border-color: var(--info-border); }
+
+/* ═══════════════════════════════════════════════════════
+   SCORE / MATCH UI
+   ═══════════════════════════════════════════════════════ */
+.score-bar {
+  height: 8px;
+  background: var(--bg-alt);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 10px 0 6px;
+}
+
+.score-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-mid) 100%);
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: var(--text-sm);
+  background: var(--bg-alt);
+  margin-bottom: 6px;
+}
+
+.score-pts {
+  font-weight: 700;
+  color: var(--success);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   NOTIFICATION / MATCH CARD
+   ═══════════════════════════════════════════════════════ */
+.notification-card {
+  background: var(--surface);
+  border: 1.5px solid var(--accent-mid);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(61,111,168,0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+.notification-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-mid));
+}
+
+/* Match comparison grid */
+.match-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.match-side {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+}
+
+.match-side-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.match-field {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: var(--text-sm);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+.match-field-key { color: var(--text-muted); }
+.match-field-val { color: var(--text); font-weight: 500; }
+
+/* ═══════════════════════════════════════════════════════
+   STEPS
+   ═══════════════════════════════════════════════════════ */
+.steps {
+  display: flex;
+  align-items: center;
+  margin-bottom: 36px;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.step-item.active { color: var(--accent); }
+.step-item.done   { color: var(--success); }
+
+.step-num {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.step-item.active .step-num { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.step-item.done   .step-num { border-color: var(--success); color: var(--success); background: var(--success-bg); }
+
+.step-connector { flex: 1; height: 2px; background: var(--border); margin: 0 10px; min-width: 20px; }
+
+/* ═══════════════════════════════════════════════════════
+   DATA TABLE
+   ═══════════════════════════════════════════════════════ */
+.data-table {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.data-table-header {
+  display: grid;
+  padding: 14px 20px;
+  background: var(--bg-alt);
+  border-bottom: 2px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.data-table-row {
+  display: grid;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--bg-alt);
+  font-size: var(--text-base);
+  align-items: center;
+  transition: background 0.1s;
+}
+
+.data-table-row:hover { background: var(--bg-alt); }
+.data-table-row:last-child { border-bottom: none; }
+
+/* ═══════════════════════════════════════════════════════
+   DIVIDER
+   ═══════════════════════════════════════════════════════ */
+.divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+/* ═══════════════════════════════════════════════════════
+   CONTACT INFO SECTION (new)
+   ═══════════════════════════════════════════════════════ */
+.consent-box {
+  background: var(--info-bg);
+  border: 1.5px solid var(--info-border);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  margin-bottom: 22px;
+}
+
+.consent-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  font-size: var(--text-base);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.consent-checkbox input[type=checkbox] {
+  width: 20px; height: 20px;
+  min-width: 20px;
+  margin-top: 2px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 28px; right: 28px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  font-size: var(--text-base);
+  color: var(--text);
+  z-index: 9999;
+  box-shadow: var(--shadow-md);
+  display: none;
+  max-width: 360px;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.toast.show { display: flex; animation: toastIn 0.3s ease; }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   MISC
+   ═══════════════════════════════════════════════════════ */
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+.text-muted { color: var(--text-muted); }
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+
+.inline-btns { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-256px); }
+  .main { margin-left: 0; padding: 24px 20px; }
+  .stats-grid, .form-row, .form-row-3, .match-compare { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   ADMIN SIDEBAR OVERRIDES
+   ═══════════════════════════════════════════════════════ */
+.admin-sidebar { background: #1A1E2E; }
+.admin-badge { background: var(--warning-bg); border: 1px solid var(--warning-border); color: var(--warning); font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+  AUTH VIEWS
+════════════════════════════════════════════ -->
+<div id="auth-view">
+
+  <!-- LOGIN -->
+  <div id="login-page" class="auth-bg">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">🛡</div>
+        <h1>Plataforma Segura</h1>
+        <p>Confidencial · Cifrado · Trauma-informado</p>
+      </div>
+
+      <div class="alert alert-info">
+        <span class="alert-icon">🔒</span>
+        <div>Tu identidad nunca es visible. Solo tu alias asignado circula dentro del sistema.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Correo electrónico <span class="req">*</span></label>
+        <input type="email" id="login-email" placeholder="tu@correo.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña <span class="req">*</span></label>
+        <input type="password" id="login-pass" placeholder="Tu contraseña"/>
+      </div>
+
+      <button class="btn btn-primary btn-full" onclick="doLogin()" style="margin-bottom:16px;">
+        🔐 Ingresar de forma segura
+      </button>
+
+      <div class="divider"></div>
+
+      <p style="font-size:var(--text-sm);color:var(--text-muted);text-align:center;margin-bottom:12px;">¿Primera vez en la plataforma?</p>
+      <button class="btn btn-secondary btn-full" onclick="showAuth('register-page')">
+        Crear cuenta anónima
+      </button>
+
+      <div style="text-align:center;margin-top:20px;">
+        <button class="btn btn-ghost" onclick="showAuth('admin-login-page')" style="font-size:var(--text-sm);">
+          Acceso para administradores →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="register-page" class="auth-bg" style="display:none;">
+    <div class="auth-card" style="max-width:520px;">
+      <button class="btn btn-ghost" onclick="showAuth('login-page')" style="margin-bottom:24px;font-size:var(--text-sm);padding:6px 0;">← Volver al inicio</button>
+
+      <div class="auth-logo" style="margin-bottom:28px;">
+        <div class="auth-logo-icon">👤</div>
+        <h1>Crear cuenta</h1>
+        <p>Tu identidad estará protegida por un alias automático</p>
+      </div>
+
+      <div class="steps">
+        <div class="step-item active" id="reg-s1"><div class="step-num">1</div><span>Cuenta</span></div>
+        <div class="step-connector"></div>
+        <div class="step-item" id="reg-s2"><div class="step-num">2</div><span>Verificación</span></div>
+        <div class="step-connector"></div>
+        <div class="step-item" id="reg-s3"><div class="step-num">3</div><span>Contacto</span></div>
+        <div class="step-connector"></div>
+        <div class="step-item" id="reg-s4"><div class="step-num">4</div><span>Listo</span></div>
+      </div>
+
+      <!-- Step 1: Credentials -->
+      <div id="reg-step-1">
+        <div class="form-group">
+          <label class="form-label">Correo electrónico <span class="req">*</span></label>
+          <input type="email" id="reg-email" placeholder="tu@correo.com"/>
+          <p class="form-hint">Solo se usa para enviarte notificaciones. Nadie más lo verá.</p>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Contraseña <span class="req">*</span></label>
+            <input type="password" id="reg-pass" placeholder="Mínimo 8 caracteres"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmar contraseña <span class="req">*</span></label>
+            <input type="password" id="reg-pass2" placeholder="Repetir"/>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="regStep1()">Continuar →</button>
+      </div>
+
+      <!-- Step 2: Email verify -->
+      <div id="reg-step-2" style="display:none;">
+        <div class="alert alert-success">
+          <span class="alert-icon">✉️</span>
+          <div>Enviamos un código a <strong id="reg-email-show"></strong>. Ingresalo abajo.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Código de 6 dígitos <span class="req">*</span></label>
+          <input type="text" placeholder="000000" class="mono" style="font-size:22px;text-align:center;letter-spacing:8px;"/>
+          <p class="form-hint">Demo: cualquier código funciona.</p>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="regStep2()">Verificar cuenta</button>
+      </div>
+
+      <!-- Step 3: Contact info (NEW) -->
+      <div id="reg-step-3" style="display:none;">
+        <div class="alert alert-info">
+          <span class="alert-icon">📱</span>
+          <div><strong>Datos de contacto seguros</strong><br/>Solo se usarán si aceptás mediación legal. Se almacenan cifrados. Nadie los ve hasta que vos des tu consentimiento explícito.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Teléfono de contacto <span class="opt">Opcional</span></label>
+          <input type="tel" id="reg-phone" placeholder="+54 11 0000 0000"/>
+          <p class="form-hint">Se cifra con AES-256. Nunca visible para administradores sin tu consentimiento.</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Método de contacto preferido <span class="req">*</span></label>
+          <select id="reg-contact-method">
+            <option value="email">Correo electrónico</option>
+            <option value="phone">Teléfono / WhatsApp</option>
+          </select>
+        </div>
+        <div class="consent-box">
+          <label class="consent-checkbox">
+            <input type="checkbox" id="reg-contact-consent"/>
+            <span>Entiendo que esta información de contacto <strong>solo será accesible para el abogado asignado si yo acepto explícitamente la mediación legal</strong>. Puedo modificar o eliminar estos datos en cualquier momento.</span>
+          </label>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="regStep3()">Finalizar registro</button>
+        <button class="btn btn-ghost btn-full" onclick="regStep3()" style="margin-top:10px;">Saltar este paso por ahora</button>
+      </div>
+
+      <!-- Step 4: Done -->
+      <div id="reg-step-4" style="display:none;text-align:center;padding:12px 0;">
+        <div style="font-size:52px;margin-bottom:20px;">✅</div>
+        <h2 style="font-family:'Lora',serif;font-size:var(--text-xl);margin-bottom:12px;">¡Cuenta creada!</h2>
+        <p style="font-size:var(--text-base);color:var(--text-secondary);margin-bottom:24px;">Tu alias seguro fue asignado automáticamente por el sistema:</p>
+        <div style="background:var(--accent-light);border:1.5px solid var(--accent-mid);border-radius:12px;padding:20px;margin-bottom:28px;display:inline-block;min-width:240px;">
+          <p class="mono" style="font-size:26px;color:var(--accent);font-weight:600;">User_48392</p>
+          <p style="font-size:13px;color:var(--text-muted);margin-top:8px;">Este alias es permanente. Nunca se muestra tu nombre real.</p>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="goToApp()">Ingresar a la plataforma →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN LOGIN -->
+  <div id="admin-login-page" class="auth-bg" style="display:none;">
+    <div class="auth-card">
+      <button class="btn btn-ghost" onclick="showAuth('login-page')" style="margin-bottom:20px;font-size:var(--text-sm);padding:6px 0;">← Volver</button>
+      <div class="auth-logo" style="margin-bottom:28px;">
+        <div class="auth-logo-icon" style="background:linear-gradient(135deg,#2D4A7A,#3D6FA8);">🔑</div>
+        <h1>Acceso Administrador</h1>
+        <p>Solo revisores autorizados</p>
+      </div>
+      <div class="alert alert-warning">
+        <span class="alert-icon">⚠️</span>
+        <div>Acceso monitoreado. Todas las acciones quedan registradas en el log de auditoría.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Usuario administrador</label>
+        <input type="text" placeholder="admin@plataforma.org"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" placeholder="••••••••"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Código 2FA <span class="req">*</span></label>
+        <input type="text" placeholder="000000" class="mono" style="font-size:20px;text-align:center;letter-spacing:6px;"/>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="goToAdmin()">Ingresar como administrador</button>
+    </div>
+  </div>
+</div><!-- /auth-view -->
+
+<!-- ════════════════════════════════════════════
+  APP — ÁREA DE USUARIO
+════════════════════════════════════════════ -->
+<div id="app-view" style="display:none;" class="app">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-mark">🛡</div>
+      <div class="sidebar-title">Plataforma Segura</div>
+      <div class="sidebar-tagline">Confidencial · Cifrado</div>
+    </div>
+
+    <div class="nav-section-label">Principal</div>
+    <div class="nav-item active" onclick="switchTab('dashboard')">
+      <span class="nav-icon">◈</span> Inicio
+    </div>
+    <div class="nav-item" onclick="switchTab('submit')">
+      <span class="nav-icon">✦</span> Enviar reporte
+    </div>
+    <div class="nav-item" onclick="switchTab('my-reports')">
+      <span class="nav-icon">◇</span> Mis reportes
+    </div>
+
+    <div class="nav-section-label">Notificaciones</div>
+    <div class="nav-item" onclick="switchTab('notifications')">
+      <span class="nav-icon">🔔</span> Notificaciones
+      <span class="nav-badge">1</span>
+    </div>
+
+    <div class="nav-section-label">Cuenta</div>
+    <div class="nav-item" onclick="switchTab('contact-settings')">
+      <span class="nav-icon">📱</span> Mis datos de contacto
+    </div>
+    <div class="nav-item" onclick="switchTab('settings')">
+      <span class="nav-icon">⚙️</span> Configuración
+    </div>
+    <div class="nav-item" onclick="logout()">
+      <span class="nav-icon">↩</span> Salir
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="alias-pill">
+        <div class="alias-dot"></div>
+        <div>
+          <div class="alias-text">User_48392</div>
+          <span class="alias-label">Tu alias anónimo</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page active" id="tab-dashboard">
+      <div class="page-title">Bienvenida</div>
+      <div class="page-subtitle">Tu espacio seguro y confidencial. Nadie puede ver quién sos.</div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">1</div>
+          <div class="stat-label">Reporte enviado</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--accent);">1</div>
+          <div class="stat-label">Coincidencia detectada</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--success);">✓</div>
+          <div class="stat-label">Datos cifrados</div>
+        </div>
+      </div>
+
+      <!-- Match notification -->
+      <div class="notification-card">
+        <span class="badge badge-pending" style="margin-bottom:16px;">● Requiere tu atención</span>
+        <h2 style="font-family:'Lora',serif;font-size:22px;font-weight:500;margin-bottom:12px;">Se detectó una coincidencia</h2>
+        <p style="font-size:var(--text-base);color:var(--text-secondary);margin-bottom:24px;line-height:1.7;">
+          Encontramos otro reporte con características similares al tuyo. Un revisor humano verificó la coincidencia.
+          Tenés la opción de recibir asistencia legal confidencial — <strong>nunca entrarás en contacto con la otra persona.</strong>
+        </p>
+        <div class="inline-btns">
+          <button class="btn btn-success" onclick="acceptLawyer()">Quiero asistencia legal</button>
+          <button class="btn btn-secondary" onclick="switchTab('notifications')">Ver detalles</button>
+        </div>
+      </div>
+
+      <!-- How it works -->
+      <div class="card">
+        <div class="card-header"><div class="section-title" style="margin:0;">¿Cómo funciona?</div></div>
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="width:36px;height:36px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--accent);flex-shrink:0;">1</div>
+            <div>
+              <p style="font-size:var(--text-base);font-weight:600;color:var(--text);margin-bottom:4px;">Enviás tu reporte de forma privada</p>
+              <p style="font-size:var(--text-sm);color:var(--text-muted);">Tu testimonio se cifra con AES-256 antes de guardarse. Ningún administrador puede leerlo.</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="width:36px;height:36px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--accent);flex-shrink:0;">2</div>
+            <div>
+              <p style="font-size:var(--text-base);font-weight:600;color:var(--text);margin-bottom:4px;">El sistema detecta patrones</p>
+              <p style="font-size:var(--text-sm);color:var(--text-muted);">El motor de coincidencias analiza solo los datos estructurales. Un revisor humano aprueba antes de notificarte.</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="width:36px;height:36px;background:var(--success-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--success);flex-shrink:0;">3</div>
+            <div>
+              <p style="font-size:var(--text-base);font-weight:600;color:var(--text);margin-bottom:4px;">Vos decidís si querés mediación legal</p>
+              <p style="font-size:var(--text-sm);color:var(--text-muted);">Solo si aceptás, un abogado verificado accede a tus datos de contacto y te escribe directamente. Las víctimas jamás se ven entre sí.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SUBMIT REPORT ── -->
+    <div class="page" id="tab-submit">
+      <div class="page-title">Enviar un reporte</div>
+      <div class="page-subtitle">Todo lo que escribas es estrictamente confidencial. Tomá el tiempo que necesitás.</div>
+
+      <div class="alert alert-info">
+        <span class="alert-icon">🔒</span>
+        <div><strong>Privacidad garantizada:</strong> Tu testimonio se cifra con AES-256 antes de ser guardado. Los datos estructurales (nombre, ciudad, lugar) se usan solo para detectar patrones — nunca para identificarte.</div>
+      </div>
+
+      <form id="report-form" onsubmit="submitReport(event)" novalidate>
+
+        <!-- SECCIÓN 1: Datos de la persona denunciada -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-icon">👤</div>
+            <div>
+              <div class="form-section-label">Sobre la persona denunciada</div>
+              <div class="form-section-desc">Estos campos se usan para detectar coincidencias entre reportes independientes.</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Nombre completo <span class="req">*</span></label>
+              <input type="text" id="f-name" placeholder="Nombre y apellido" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Apodo o alias <span class="opt">Opcional</span></label>
+              <input type="text" placeholder="Si es conocido por otro nombre"/>
+            </div>
+          </div>
+
+          <!-- Profession dropdown -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Profesión <span class="opt">Opcional</span></label>
+              <select id="f-profession" onchange="toggleOther(this,'f-profession-other')">
+                <option value="">Seleccionar...</option>
+                <option>Médico/a</option>
+                <option>Docente / Profesor/a</option>
+                <option>Abogado/a</option>
+                <option>Psicólogo/a</option>
+                <option>Sacerdote / Religioso/a</option>
+                <option>Empleador / Jefe</option>
+                <option>Compañero/a de trabajo</option>
+                <option>Entrenador/a</option>
+                <option>Empleado/a doméstico/a</option>
+                <option value="other">Otra profesión</option>
+              </select>
+              <div class="other-spec" id="f-profession-other">
+                <input type="text" placeholder="Especificá la profesión"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tipo de vínculo <span class="req">*</span></label>
+              <select id="f-relationship" onchange="toggleOther(this,'f-relationship-other')" required>
+                <option value="">Seleccionar...</option>
+                <option value="work">Laboral</option>
+                <option value="school">Educativo / Escolar</option>
+                <option value="family">Familiar</option>
+                <option value="social">Social / Conocido</option>
+                <option value="medical">Médico / Terapéutico</option>
+                <option value="religious">Religioso</option>
+                <option value="other">Otro vínculo</option>
+              </select>
+              <div class="other-spec" id="f-relationship-other">
+                <input type="text" placeholder="Especificá el tipo de vínculo"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Institución u organización <span class="opt">Opcional</span></label>
+            <input type="text" placeholder="Nombre de la empresa, escuela, hospital, iglesia, etc."/>
+            <p class="form-hint">Ingresá el nombre oficial si lo recordás. Ayuda a detectar patrones.</p>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 2: Lugar del incidente -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-icon">📍</div>
+            <div>
+              <div class="form-section-label">Lugar del incidente</div>
+              <div class="form-section-desc">Donde ocurrió el hecho. Información más específica mejora la detección de patrones.</div>
+            </div>
+          </div>
+
+          <!-- Country -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">País <span class="req">*</span></label>
+              <select id="f-country" onchange="updateCities(this.value); toggleOther(this,'f-country-other')" required>
+                <option value="">Seleccionar país...</option>
+                <option value="AR">Argentina</option>
+                <option value="MX">México</option>
+                <option value="CL">Chile</option>
+                <option value="CO">Colombia</option>
+                <option value="PE">Perú</option>
+                <option value="UY">Uruguay</option>
+                <option value="BO">Bolivia</option>
+                <option value="PY">Paraguay</option>
+                <option value="VE">Venezuela</option>
+                <option value="EC">Ecuador</option>
+                <option value="BR">Brasil</option>
+                <option value="ES">España</option>
+                <option value="US">Estados Unidos</option>
+                <option value="other">Otro país</option>
+              </select>
+              <div class="other-spec" id="f-country-other">
+                <input type="text" placeholder="Especificá el país"/>
+              </div>
+            </div>
+
+            <!-- City — dependent on country -->
+            <div class="form-group">
+              <label class="form-label">Ciudad <span class="req">*</span></label>
+              <select id="f-city" onchange="toggleOther(this,'f-city-other')" required>
+                <option value="">Primero seleccioná un país</option>
+              </select>
+              <div class="other-spec" id="f-city-other">
+                <input type="text" placeholder="Especificá la ciudad"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- NEW: place_of_incident -->
+          <div class="form-group">
+            <label class="form-label">Lugar específico del incidente <span class="req">*</span></label>
+            <input type="text" id="f-place" placeholder="Ej: Oficina en piso 4 de Av. Corrientes 1234, Aula 302 de la Facultad de Medicina, Consultorio particular, Parroquia San Pedro..."/>
+            <p class="form-hint">Describí el lugar concreto donde ocurrió. Cuanto más específico, mejor para detectar coincidencias. No tiene que ser una dirección exacta.</p>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Año del incidente <span class="req">*</span></label>
+              <input type="number" id="f-year" placeholder="Ej: 2022" min="1970" max="2025" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mes aproximado <span class="opt">Opcional</span></label>
+              <select id="f-month">
+                <option value="">No recuerdo / Prefiero no decir</option>
+                <option value="1">Enero</option><option value="2">Febrero</option>
+                <option value="3">Marzo</option><option value="4">Abril</option>
+                <option value="5">Mayo</option><option value="6">Junio</option>
+                <option value="7">Julio</option><option value="8">Agosto</option>
+                <option value="9">Septiembre</option><option value="10">Octubre</option>
+                <option value="11">Noviembre</option><option value="12">Diciembre</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 3: Testimonio cifrado -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-icon">🔒</div>
+            <div>
+              <div class="form-section-label">Tu testimonio</div>
+              <div class="form-section-desc">Cifrado automáticamente antes de guardarse. Nadie más puede leer esto.</div>
+            </div>
+          </div>
+
+          <div class="alert alert-success" style="margin-bottom:24px;">
+            <span class="alert-icon">🔐</span>
+            <div><strong>Cifrado AES-256 activo.</strong> Tu descripción se cifra en el momento en que hacés clic en "Enviar". Ningún administrador puede acceder a este contenido.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Descripción de lo ocurrido <span class="req">*</span></label>
+            <div class="encrypted-wrap">
+              <textarea id="f-description" placeholder="Contá lo que ocurrió con tus propias palabras. No hay respuestas correctas ni incorrectas. Podés incluir tanto o tan poco detalle como quieras. Tomá el tiempo que necesités." required></textarea>
+              <div class="enc-badge">🔒 AES-256</div>
+            </div>
+            <p class="form-hint">Este campo <strong>nunca</strong> se usa en el motor de coincidencias. Solo vos, y eventualmente un abogado si aceptás mediación, pueden leerlo.</p>
+          </div>
+        </div>
+
+        <div class="inline-btns">
+          <button type="submit" class="btn btn-primary">Enviar reporte cifrado 🔒</button>
+          <button type="button" class="btn btn-secondary">Guardar borrador</button>
+        </div>
+
+        <p style="font-size:13px;color:var(--text-muted);margin-top:16px;line-height:1.6;">
+          Al enviar aceptás que los datos estructurales (nombre, lugar, ciudad, institución) sean procesados para detección de patrones. Tu descripción se almacena cifrada y solo puede ser descifrada con tu autorización.
+        </p>
+      </form>
+    </div>
+
+    <!-- ── MY REPORTS ── -->
+    <div class="page" id="tab-my-reports">
+      <div class="page-title">Mis reportes</div>
+      <div class="page-subtitle">Solo vos podés ver el contenido de tus reportes.</div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Carlos M. · Buenos Aires</div>
+            <div style="font-size:var(--text-sm);color:var(--text-muted);" class="mono">Enviado el 10 de marzo de 2024</div>
+          </div>
+          <span class="badge badge-approved">✓ Recibido</span>
+        </div>
+
+        <div class="form-row-3" style="margin-bottom:20px;">
+          <div style="background:var(--bg-alt);border-radius:8px;padding:12px 16px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">INSTITUCIÓN</div>
+            <div style="font-size:var(--text-base);">Estudio Jur. Norte</div>
+          </div>
+          <div style="background:var(--bg-alt);border-radius:8px;padding:12px 16px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">LUGAR</div>
+            <div style="font-size:var(--text-base);">Oficina piso 4, Av. Corrientes</div>
+          </div>
+          <div style="background:var(--bg-alt);border-radius:8px;padding:12px 16px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">AÑO</div>
+            <div style="font-size:var(--text-base);">2021 · Laboral</div>
+          </div>
+        </div>
+
+        <!-- Encrypted field display -->
+        <div style="background:var(--info-bg);border:1.5px solid var(--info-border);border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:14px;">
+          <span style="font-size:24px;">🔒</span>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;color:var(--info);margin-bottom:4px;">Descripción cifrada</div>
+            <div class="mono" style="font-size:12px;color:var(--text-muted);">AES-256-CBC · IV: a4f2...d891 · ••••••••••••••••••••••••••••••••</div>
+          </div>
+          <button class="btn btn-secondary btn-sm">Desencriptar</button>
+        </div>
+
+        <div class="divider"></div>
+        <div class="inline-btns">
+          <button class="btn btn-secondary btn-sm">✏️ Editar</button>
+          <button class="btn btn-danger btn-sm">🗑 Eliminar reporte</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="switchTab('submit')">+ Enviar otro reporte</button>
+    </div>
+
+    <!-- ── NOTIFICATIONS ── -->
+    <div class="page" id="tab-notifications">
+      <div class="page-title">Notificaciones</div>
+      <div class="page-subtitle">Comunicaciones confidenciales de la plataforma.</div>
+
+      <div class="notification-card">
+        <div class="card-header" style="margin-bottom:16px;">
+          <div>
+            <div style="font-size:13px;color:var(--text-muted);" class="mono">15 de junio de 2024</div>
+            <h2 style="font-family:'Lora',serif;font-size:22px;font-weight:500;margin-top:6px;">Se detectó una coincidencia</h2>
+          </div>
+          <span class="badge badge-pending">Pendiente</span>
+        </div>
+
+        <p style="font-size:var(--text-base);color:var(--text-secondary);margin-bottom:24px;line-height:1.75;">
+          Detectamos otro reporte independiente con características estructurales similares al tuyo. Un revisor humano certificó la coincidencia antes de notificarte.
+        </p>
+
+        <!-- Score breakdown -->
+        <div style="background:var(--bg-alt);border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+          <div style="font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;">Puntaje de coincidencia</div>
+          <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;">
+            <div style="font-family:'Lora',serif;font-size:52px;font-weight:400;color:var(--text);line-height:1;">115</div>
+            <div style="flex:1;">
+              <div class="score-bar"><div class="score-fill" style="width:92%;"></div></div>
+              <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Umbral de coincidencia: 85 puntos</div>
+            </div>
+          </div>
+          <div class="score-item"><span>Nombre exacto</span><span class="score-pts">+50</span></div>
+          <div class="score-item"><span>Ciudad coincide</span><span class="score-pts">+20</span></div>
+          <div class="score-item"><span>Institución coincide</span><span class="score-pts">+20</span></div>
+          <div class="score-item"><span>Lugar específico similar</span><span class="score-pts">+25</span></div>
+          <div class="score-item"><span>Vínculo laboral coincide</span><span class="score-pts">+15</span></div>
+          <div class="score-item"><span>Profesión coincide</span><span class="score-pts">+10</span></div>
+          <div class="score-item" style="opacity:0.5;"><span>Año (diferencia 1 año)</span><span class="score-pts">+10</span></div>
+        </div>
+
+        <div class="alert alert-info">
+          <span class="alert-icon">👤</span>
+          <div><strong>Tu privacidad está garantizada.</strong> Nunca verás la identidad de la otra persona, ni ella la tuya. Si aceptás mediación, cada una es contactada por separado y de forma confidencial por el mismo abogado verificado.</div>
+        </div>
+
+        <!-- Consent & contact flow -->
+        <div id="lawyer-choice">
+          <h3 style="font-size:var(--text-lg);font-weight:500;margin-bottom:8px;">¿Querés asistencia legal confidencial?</h3>
+          <p style="font-size:var(--text-base);color:var(--text-secondary);margin-bottom:20px;line-height:1.6;">Un abogado verificado podría contactarte de forma privada para orientarte sobre los pasos legales disponibles. Esta decisión es completamente voluntaria.</p>
+
+          <div class="consent-box" id="lawyer-consent-box">
+            <label class="consent-checkbox">
+              <input type="checkbox" id="chk-lawyer-consent"/>
+              <span>Consiento que mis datos de contacto cifrados (correo / teléfono según mi preferencia configurada) sean accesibles por el abogado asignado, exclusivamente para contactarme sobre este caso.</span>
+            </label>
+          </div>
+
+          <div class="inline-btns">
+            <button class="btn btn-success" onclick="acceptLawyer()">✓ Sí, quiero ser contactada</button>
+            <button class="btn btn-secondary" onclick="declineLawyer()">No por ahora</button>
+          </div>
+          <p style="font-size:13px;color:var(--text-muted);margin-top:12px;">Podés cambiar esta decisión en cualquier momento desde "Mis datos de contacto".</p>
+        </div>
+
+        <div id="lawyer-accepted" style="display:none;">
+          <div class="alert alert-success">
+            <span class="alert-icon">✅</span>
+            <div><strong>Solicitud enviada.</strong> Un abogado verificado recibirá tus datos de contacto y se comunicará con vos a la brevedad. Tu privacidad sigue protegida.</div>
+          </div>
+          <span class="badge badge-approved" style="font-size:14px;">Mediación legal: aceptada</span>
+        </div>
+
+        <div id="lawyer-declined" style="display:none;">
+          <div class="alert" style="background:var(--bg-alt);border-color:var(--border);color:var(--text-secondary);">
+            <span class="alert-icon">◎</span>
+            <div>Decisión guardada. Podés cambiar tu respuesta en cualquier momento desde tus notificaciones.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CONTACT SETTINGS (NEW) ── -->
+    <div class="page" id="tab-contact-settings">
+      <div class="page-title">Mis datos de contacto</div>
+      <div class="page-subtitle">Solo accesibles para el abogado asignado si aceptás mediación.</div>
+
+      <div class="alert alert-info">
+        <span class="alert-icon">🔐</span>
+        <div><strong>Estos datos se almacenan cifrados con AES-256.</strong> Ningún administrador puede verlos. Solo un abogado verificado puede acceder, y únicamente después de que des tu consentimiento explícito en el flujo de mediación.</div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Datos de contacto cifrados</div>
+
+        <div class="form-group">
+          <label class="form-label">Teléfono de contacto <span class="opt">Opcional</span></label>
+          <input type="tel" value="+54 11 0000 0000"/>
+          <p class="form-hint">Almacenado cifrado. Visible solo tras tu consentimiento.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Método de contacto preferido</label>
+          <select>
+            <option>Correo electrónico</option>
+            <option>Teléfono / WhatsApp</option>
+          </select>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section-title" style="margin-bottom:16px;">Estado de consentimiento</div>
+
+        <div style="background:var(--bg-alt);border-radius:10px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:var(--text-base);font-weight:600;margin-bottom:4px;">Mediación legal · Caso #M1</div>
+            <div style="font-size:var(--text-sm);color:var(--text-muted);">Consentimiento otorgado el 15/06/2024</div>
+          </div>
+          <span class="badge badge-approved">Consentimiento activo</span>
+        </div>
+
+        <div style="margin-top:20px;">
+          <button class="btn btn-primary">Guardar cambios</button>
+          <button class="btn btn-danger" style="margin-left:12px;">Revocar consentimiento</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="page" id="tab-settings">
+      <div class="page-title">Configuración</div>
+      <div class="page-subtitle">Gestioná tu cuenta y privacidad.</div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <div class="section-title">Tu identidad</div>
+        <div style="display:flex;align-items:center;gap:16px;background:var(--accent-light);border:1.5px solid var(--accent-mid);border-radius:10px;padding:16px 20px;margin-bottom:24px;">
+          <span style="font-size:32px;">👤</span>
+          <div>
+            <div class="mono" style="font-size:22px;font-weight:600;color:var(--accent);">User_48392</div>
+            <div style="font-size:var(--text-sm);color:var(--text-muted);margin-top:4px;">Alias permanente. No puede modificarse — protege tu anonimato.</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Correo de notificaciones</label>
+          <input type="email" value="usuario@ejemplo.com"/>
+        </div>
+        <button class="btn btn-primary">Guardar cambios</button>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <div class="section-title">Seguridad</div>
+        <div class="form-group">
+          <label class="form-label">Contraseña actual</label>
+          <input type="password" placeholder="••••••••"/>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nueva contraseña</label>
+            <input type="password" placeholder="Nueva contraseña"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmar</label>
+            <input type="password" placeholder="Repetir"/>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg-alt);border-radius:10px;padding:14px 18px;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:var(--text-base);font-weight:600;">Autenticación de dos factores (2FA)</div>
+            <div style="font-size:var(--text-sm);color:var(--text-muted);">Recomendado para mayor seguridad</div>
+          </div>
+          <button class="btn btn-secondary btn-sm">Activar 2FA</button>
+        </div>
+        <button class="btn btn-primary">Actualizar contraseña</button>
+      </div>
+
+      <div class="card" style="border-color:var(--danger-border);">
+        <div class="section-title" style="color:var(--danger);">Zona de peligro</div>
+        <p style="font-size:var(--text-base);color:var(--text-secondary);margin-bottom:20px;line-height:1.7;">
+          Eliminar tu cuenta borrará permanentemente tu información de contacto y datos personales. Los reportes anonimizados pueden conservarse para análisis estadísticos según nuestra política de privacidad.
+        </p>
+        <button class="btn btn-danger" onclick="confirmDelete()">🗑 Eliminar mi cuenta</button>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /app-view -->
+
+<!-- ════════════════════════════════════════════
+  ADMIN PANEL
+════════════════════════════════════════════ -->
+<div id="admin-view" style="display:none;" class="app">
+  <aside class="sidebar admin-sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-mark" style="background:linear-gradient(135deg,#4A3D7A,#7468A0);">🔑</div>
+      <div class="sidebar-title">Panel Admin</div>
+      <div class="sidebar-tagline">Solo revisores autorizados</div>
+    </div>
+
+    <div class="nav-section-label">Revisión</div>
+    <div class="nav-item active" onclick="switchAdminTab('queue')">
+      <span class="nav-icon">📋</span> Cola de revisión
+      <span class="nav-badge">1</span>
+    </div>
+    <div class="nav-item" onclick="switchAdminTab('reports')">
+      <span class="nav-icon">📄</span> Todos los reportes
+    </div>
+    <div class="nav-item" onclick="switchAdminTab('lawyers')">
+      <span class="nav-icon">⚖️</span> Contactos legales
+    </div>
+    <div class="nav-item" onclick="switchAdminTab('audit')">
+      <span class="nav-icon">🗂️</span> Log de auditoría
+    </div>
+
+    <div class="nav-section-label">Sistema</div>
+    <div class="nav-item" onclick="switchAdminTab('engine')">
+      <span class="nav-icon">⚙️</span> Motor de coincidencias
+    </div>
+    <div class="nav-item" onclick="logout()">
+      <span class="nav-icon">↩</span> Salir
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="alias-pill">
+        <div class="alias-dot" style="background:var(--warning);box-shadow:0 0 6px rgba(138,106,30,0.5);"></div>
+        <div>
+          <div class="alias-text">Rev.01 — Admin</div>
+          <span class="alias-label">Sesión monitoreada</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ADMIN QUEUE -->
+    <div class="page active" id="admin-tab-queue">
+      <div class="page-title">Cola de revisión</div>
+      <div class="page-subtitle">Solo ves metadatos estructurales. Nunca el contenido de los testimonios cifrados.</div>
+
+      <div class="alert alert-warning">
+        <span class="alert-icon">⚖️</span>
+        <div>Aprobá solo cuando la evidencia estructural sea clara y sólida. Toda acción queda en el log de auditoría con tu ID, timestamp y decisión.</div>
+      </div>
+
+      <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow);margin-bottom:24px;">
+        <!-- Match header -->
+        <div style="background:var(--bg-alt);padding:18px 24px;border-bottom:2px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);" class="mono">Coincidencia #M1</div>
+            <div style="font-size:var(--text-lg);font-weight:600;color:var(--text);margin-top:4px;">Carlos M. · Buenos Aires, AR</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <div style="text-align:right;">
+              <div style="font-family:'Lora',serif;font-size:42px;font-weight:400;color:var(--text);line-height:1;">115</div>
+              <div style="font-size:12px;color:var(--text-muted);">/ umbral: 85</div>
+            </div>
+            <span class="badge badge-pending">Pendiente</span>
+          </div>
+        </div>
+
+        <div style="padding:24px;">
+          <!-- Compare -->
+          <div class="match-compare">
+            <div class="match-side">
+              <div class="match-side-label">Reporte 1 · User_48392</div>
+              <div class="match-field"><span class="match-field-key">Nombre</span><span class="match-field-val">Carlos M.</span></div>
+              <div class="match-field"><span class="match-field-key">Ciudad</span><span class="match-field-val">Buenos Aires</span></div>
+              <div class="match-field"><span class="match-field-key">Institución</span><span class="match-field-val">Estudio Jur. Norte</span></div>
+              <div class="match-field"><span class="match-field-key">Lugar</span><span class="match-field-val">Oficina piso 4, Corrientes</span></div>
+              <div class="match-field"><span class="match-field-key">Profesión</span><span class="match-field-val">Abogado</span></div>
+              <div class="match-field"><span class="match-field-key">Vínculo</span><span class="match-field-val">Laboral</span></div>
+              <div class="match-field"><span class="match-field-key">Año</span><span class="match-field-val">2021</span></div>
+            </div>
+            <div class="match-side">
+              <div class="match-side-label">Reporte 2 · User_71203</div>
+              <div class="match-field"><span class="match-field-key">Nombre</span><span class="match-field-val">Carlos M.</span></div>
+              <div class="match-field"><span class="match-field-key">Ciudad</span><span class="match-field-val">Buenos Aires</span></div>
+              <div class="match-field"><span class="match-field-key">Institución</span><span class="match-field-val">Estudio Jur. Norte</span></div>
+              <div class="match-field"><span class="match-field-key">Lugar</span><span class="match-field-val">Oficina piso 4, Corrientes</span></div>
+              <div class="match-field"><span class="match-field-key">Profesión</span><span class="match-field-val">Abogado</span></div>
+              <div class="match-field"><span class="match-field-key">Vínculo</span><span class="match-field-val">Laboral</span></div>
+              <div class="match-field"><span class="match-field-key">Año</span><span class="match-field-val">2022</span></div>
+            </div>
+          </div>
+
+          <!-- Score detail -->
+          <div style="background:var(--bg-alt);border-radius:10px;padding:18px 22px;margin:20px 0;">
+            <div style="font-size:12px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;">Desglose del puntaje</div>
+            <div class="score-bar" style="height:10px;margin-bottom:16px;"><div class="score-fill" style="width:92%"></div></div>
+            <div class="form-row-3">
+              <div class="score-item">Nombre exacto<span class="score-pts">+50</span></div>
+              <div class="score-item">Ciudad<span class="score-pts">+20</span></div>
+              <div class="score-item">Institución<span class="score-pts">+20</span></div>
+              <div class="score-item">Lugar específico<span class="score-pts">+25</span></div>
+              <div class="score-item">Vínculo<span class="score-pts">+15</span></div>
+              <div class="score-item">Profesión<span class="score-pts">+10</span></div>
+            </div>
+          </div>
+
+          <div class="alert" style="background:var(--info-bg);border-color:var(--info-border);color:var(--info);">
+            <span class="alert-icon">🔒</span>
+            <div>La descripción cifrada de ambos reportes <strong>no es visible</strong> en este panel. Solo se procesan metadatos estructurales.</div>
+          </div>
+
+          <div id="queue-actions-m1" class="inline-btns">
+            <button class="btn btn-success" onclick="approveMatch('m1')">✓ Aprobar coincidencia</button>
+            <button class="btn btn-danger" onclick="rejectMatch('m1')">✕ Rechazar</button>
+            <button class="btn btn-ghost">Ver perfil del revisor</button>
+          </div>
+          <div id="queue-result-m1" style="display:none;"></div>
+        </div>
+      </div>
+
+      <div style="text-align:center;padding:48px;color:var(--text-muted);">
+        <div style="font-size:40px;margin-bottom:16px;">◎</div>
+        <div style="font-size:var(--text-base);">No hay más coincidencias pendientes</div>
+      </div>
+    </div>
+
+    <!-- ADMIN REPORTS -->
+    <div class="page" id="admin-tab-reports">
+      <div class="page-title">Todos los reportes</div>
+      <div class="page-subtitle">Metadatos estructurales únicamente. Sin acceso a testimonios cifrados.</div>
+
+      <div class="data-table">
+        <div class="data-table-header" style="grid-template-columns:2fr 1fr 1.5fr 1.5fr 1fr 1fr;">
+          <span>Nombre</span><span>País · Ciudad</span><span>Lugar</span><span>Institución</span><span>Año</span><span>Fecha</span>
+        </div>
+        <div class="data-table-row" style="grid-template-columns:2fr 1fr 1.5fr 1.5fr 1fr 1fr;">
+          <span>Carlos M.</span>
+          <span style="color:var(--text-muted);">AR · Bs As</span>
+          <span style="color:var(--text-muted);font-size:13px;">Oficina p. 4, Corrientes</span>
+          <span style="color:var(--text-muted);font-size:13px;">Estudio Jur. Norte</span>
+          <span>2021</span>
+          <span style="font-size:12px;" class="mono">10/03/24</span>
+        </div>
+        <div class="data-table-row" style="grid-template-columns:2fr 1fr 1.5fr 1.5fr 1fr 1fr;">
+          <span>Carlos M.</span>
+          <span style="color:var(--text-muted);">AR · Bs As</span>
+          <span style="color:var(--text-muted);font-size:13px;">Oficina p. 4, Corrientes</span>
+          <span style="color:var(--text-muted);font-size:13px;">Estudio Jur. Norte</span>
+          <span>2022</span>
+          <span style="font-size:12px;" class="mono">22/05/24</span>
+        </div>
+        <div class="data-table-row" style="grid-template-columns:2fr 1fr 1.5fr 1.5fr 1fr 1fr;">
+          <span>Roberto G.</span>
+          <span style="color:var(--text-muted);">AR · Córdoba</span>
+          <span style="color:var(--text-muted);font-size:13px;">Aula 302, Fac. Medicina</span>
+          <span style="color:var(--text-muted);font-size:13px;">Universidad Central</span>
+          <span>2020</span>
+          <span style="font-size:12px;" class="mono">01/06/24</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN LAWYERS -->
+    <div class="page" id="admin-tab-lawyers">
+      <div class="page-title">Contactos legales</div>
+      <div class="page-subtitle">Usuarios que aceptaron mediación. Datos de contacto solo visibles post-consentimiento.</div>
+
+      <div class="alert alert-warning">
+        <span class="alert-icon">🔐</span>
+        <div>Los datos de contacto (email/teléfono) <strong>no son visibles aquí</strong>. Solo el abogado asignado puede acceder, directamente a través de su portal seguro separado.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">User_48392</div>
+            <div style="font-size:var(--text-sm);color:var(--text-muted);">Vinculado a Reporte #R1 · Coincidencia #M1</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Consentimiento otorgado: 15/06/2024 · Abogado: Dra. García, Fernanda</div>
+          </div>
+          <span class="badge badge-pending">Pendiente de contacto</span>
+        </div>
+        <div class="inline-btns">
+          <button class="btn btn-success btn-sm">Marcar como contactado</button>
+          <button class="btn btn-secondary btn-sm">Cerrar caso</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN AUDIT -->
+    <div class="page" id="admin-tab-audit">
+      <div class="page-title">Log de auditoría</div>
+      <div class="page-subtitle">Registro inmutable de todas las acciones administrativas.</div>
+
+      <div class="data-table">
+        <div class="data-table-header" style="grid-template-columns:1.5fr 1fr 3fr 1fr;">
+          <span>Timestamp</span><span>Revisor</span><span>Acción</span><span>Resultado</span>
+        </div>
+        <div id="audit-log">
+          <div class="data-table-row" style="grid-template-columns:1.5fr 1fr 3fr 1fr;">
+            <span class="mono" style="font-size:13px;color:var(--text-muted);">2024-06-10 09:14</span>
+            <span>Rev.01</span>
+            <span style="color:var(--text-muted);">Login exitoso</span>
+            <span class="badge badge-approved">OK</span>
+          </div>
+          <div class="data-table-row" style="grid-template-columns:1.5fr 1fr 3fr 1fr;">
+            <span class="mono" style="font-size:13px;color:var(--text-muted);">2024-06-09 14:22</span>
+            <span>Rev.02</span>
+            <span style="color:var(--text-muted);">Revisó coincidencia #M2 → Rechazada</span>
+            <span class="badge badge-rejected">REJ</span>
+          </div>
+          <div class="data-table-row" style="grid-template-columns:1.5fr 1fr 3fr 1fr;">
+            <span class="mono" style="font-size:13px;color:var(--text-muted);">2024-06-05 11:08</span>
+            <span>Rev.01</span>
+            <span style="color:var(--text-muted);">Revisó coincidencia #M0 → Aprobada</span>
+            <span class="badge badge-approved">APR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN ENGINE (UPDATED SCORING) -->
+    <div class="page" id="admin-tab-engine">
+      <div class="page-title">Motor de coincidencias</div>
+      <div class="page-subtitle">Configuración del algoritmo de detección de patrones.</div>
+
+      <div class="alert alert-info" style="margin-bottom:28px;">
+        <span class="alert-icon">ℹ️</span>
+        <div>
+          <strong>Umbral actualizado: 85 puntos.</strong> El umbral anterior era 70. Se incrementó porque el motor ahora incluye más señales (+place_of_incident, +relationship_type, +profession). Con más señales disponibles, un umbral más alto reduce falsos positivos manteniendo sensibilidad para casos con múltiples coincidencias.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Umbrales globales</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Puntaje mínimo para marcar coincidencia</label>
+            <input type="number" value="85" min="1" max="200"/>
+            <p class="form-hint">Rango máximo teórico: 150 puntos (todos los campos coinciden perfectamente).</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Diferencia máxima en años</label>
+            <input type="number" value="2" min="0" max="10"/>
+            <p class="form-hint">Años de diferencia permitidos para otorgar el bonus temporal.</p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-title">Pesos del scoring (suma máxima: 150)</div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="form-label">Nombre exacto <span style="color:var(--success);font-size:13px;">+50</span></label>
+            <input type="number" value="50"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ciudad <span style="color:var(--success);font-size:13px;">+20</span></label>
+            <input type="number" value="20"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Institución <span style="color:var(--success);font-size:13px;">+20</span></label>
+            <input type="number" value="20"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Lugar específico <span style="color:var(--accent);font-size:13px;">+25 ✦ nuevo</span></label>
+            <input type="number" value="25"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipo de vínculo <span style="color:var(--accent);font-size:13px;">+15 ✦ nuevo</span></label>
+            <input type="number" value="15"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Profesión <span style="color:var(--accent);font-size:13px;">+10 ✦ nuevo</span></label>
+            <input type="number" value="10"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Año cercano (≤2 años) <span style="color:var(--success);font-size:13px;">+10</span></label>
+            <input type="number" value="10"/>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-alt);border-radius:10px;padding:16px 20px;margin-bottom:24px;font-size:var(--text-sm);color:var(--text-secondary);line-height:1.7;">
+          <strong>Lógica de normalización antes del matching:</strong> Todos los strings se convierten a minúsculas, se eliminan acentos y caracteres especiales, y se aplica trim. Para <code style="background:var(--border);padding:2px 6px;border-radius:4px;">place_of_incident</code> se usa similaridad de tokens (Jaccard ≥ 0.6 equivale a coincidencia parcial = +12 pts en lugar de +25).
+        </div>
+
+        <button class="btn btn-primary">Guardar configuración</button>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Schema SQL actualizado</div>
+        <pre style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:20px;font-size:13px;font-family:'JetBrains Mono',monospace;overflow-x:auto;line-height:1.7;color:var(--text-secondary);">-- ─────────────────────────────────────────
+-- TABLA: users (actualizada)
+-- ─────────────────────────────────────────
+CREATE TABLE users (
+  id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email                   TEXT NOT NULL UNIQUE,
+  password_hash           TEXT NOT NULL,          -- bcrypt cost ≥ 12
+  alias                   TEXT NOT NULL UNIQUE,   -- User_XXXXX
+  verified                BOOLEAN DEFAULT FALSE,
+  contact_phone_enc       TEXT,                   -- AES-256 cifrado
+  preferred_contact       TEXT DEFAULT 'email',   -- email | phone
+  consent_to_contact      BOOLEAN DEFAULT FALSE,
+  created_at              TIMESTAMPTZ DEFAULT now()
+);
+
+-- ─────────────────────────────────────────
+-- TABLA: reports (actualizada)
+-- ─────────────────────────────────────────
+CREATE TABLE reports (
+  id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id                 UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+  -- Datos del acusado
+  full_name               TEXT NOT NULL,          -- normalizado para matching
+  full_name_normalized    TEXT NOT NULL,           -- lowercase, sin acentos
+  nickname                TEXT,
+  profession              TEXT,                    -- de dropdown
+  profession_other        TEXT,                    -- si "other"
+  institution             TEXT,
+
+  -- Lugar (ACTUALIZADO)
+  country                 TEXT NOT NULL,           -- código ISO o texto
+  city                    TEXT NOT NULL,
+  city_other              TEXT,
+  place_of_incident       TEXT NOT NULL,           -- NUEVO campo
+  place_normalized        TEXT NOT NULL,           -- para matching
+
+  -- Tiempo y vínculo
+  incident_year           INTEGER NOT NULL,
+  incident_month          INTEGER,
+  relationship_type       TEXT NOT NULL,           -- del dropdown estandarizado
+  relationship_other      TEXT,
+
+  -- Testimonio
+  encrypted_description   TEXT NOT NULL,           -- AES-256-CBC
+  description_iv          TEXT NOT NULL,           -- IV separado
+
+  created_at              TIMESTAMPTZ DEFAULT now()
+);
+
+-- ─────────────────────────────────────────
+-- TABLA: matches (actualizada)
+-- ─────────────────────────────────────────
+CREATE TABLE matches (
+  id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  report_id_1             UUID NOT NULL REFERENCES reports(id),
+  report_id_2             UUID NOT NULL REFERENCES reports(id),
+  score                   INTEGER NOT NULL,
+  score_breakdown         JSONB,                  -- {name:50, city:20, ...}
+  status                  TEXT DEFAULT 'pending_review',
+                            -- pending_review | approved | rejected
+  reviewed_by             UUID,                   -- admin user id
+  reviewed_at             TIMESTAMPTZ,
+  rejection_reason        TEXT,
+  created_at              TIMESTAMPTZ DEFAULT now(),
+  CONSTRAINT no_self_match CHECK (report_id_1 != report_id_2)
+);
+
+-- ─────────────────────────────────────────
+-- TABLA: lawyer_contacts (actualizada)
+-- ─────────────────────────────────────────
+CREATE TABLE lawyer_contacts (
+  id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id                 UUID NOT NULL REFERENCES users(id),
+  report_id               UUID NOT NULL REFERENCES reports(id),
+  match_id                UUID NOT NULL REFERENCES matches(id),
+  consent_given_at        TIMESTAMPTZ,            -- timestamp del consentimiento
+  status                  TEXT DEFAULT 'pending', -- pending | contacted | closed
+  lawyer_id               UUID,                   -- FK a tabla de abogados
+  created_at              TIMESTAMPTZ DEFAULT now()
+);
+
+-- ─────────────────────────────────────────
+-- TABLA: audit_log
+-- ─────────────────────────────────────────
+CREATE TABLE audit_log (
+  id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  admin_id                UUID NOT NULL,
+  action                  TEXT NOT NULL,
+  entity_type             TEXT,                   -- match | user | report
+  entity_id               UUID,
+  result                  TEXT,
+  ip_address              TEXT,
+  created_at              TIMESTAMPTZ DEFAULT now()
+);
+
+-- Índices para el motor de matching
+CREATE INDEX idx_reports_name_norm ON reports(full_name_normalized);
+CREATE INDEX idx_reports_city      ON reports(city);
+CREATE INDEX idx_reports_year      ON reports(incident_year);
+CREATE INDEX idx_matches_status    ON matches(status);</pre>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Algoritmo de matching actualizado (TypeScript)</div>
+        <pre style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:20px;font-size:13px;font-family:'JetBrains Mono',monospace;overflow-x:auto;line-height:1.7;color:var(--text-secondary);">// normalize.ts
+export function normalize(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // remove accents
+    .replace(/[^a-z0-9\s]/g, '')
+    .trim();
+}
+
+// jaccard similarity for place matching
+function jaccardSimilarity(a: string, b: string): number {
+  const setA = new Set(normalize(a).split(/\s+/));
+  const setB = new Set(normalize(b).split(/\s+/));
+  const intersection = new Set([...setA].filter(x => setB.has(x)));
+  const union = new Set([...setA, ...setB]);
+  return union.size === 0 ? 0 : intersection.size / union.size;
+}
+
+// matchingEngine.ts
+interface ScoreBreakdown {
+  name: number;
+  city: number;
+  institution: number;
+  place: number;
+  relationship: number;
+  profession: number;
+  year: number;
+  total: number;
+}
+
+const WEIGHTS = {
+  name:         50,
+  city:         20,
+  institution:  20,
+  place:        25,   // NEW — exact match
+  placePartial: 12,   // NEW — Jaccard ≥ 0.6
+  relationship: 15,   // NEW
+  profession:   10,   // NEW
+  year:         10,
+};
+
+const THRESHOLD = 85; // raised from 70
+
+export function calculateScore(r1: Report, r2: Report): ScoreBreakdown {
+  let score = 0;
+  const breakdown: Partial&lt;ScoreBreakdown&gt; = {};
+
+  // Name — exact normalized match
+  const namePts = normalize(r1.full_name) === normalize(r2.full_name)
+    ? WEIGHTS.name : 0;
+  breakdown.name = namePts;
+  score += namePts;
+
+  // City
+  const cityPts = normalize(r1.city) === normalize(r2.city)
+    ? WEIGHTS.city : 0;
+  breakdown.city = cityPts;
+  score += cityPts;
+
+  // Institution
+  const instPts = r1.institution && r2.institution &&
+    normalize(r1.institution) === normalize(r2.institution)
+    ? WEIGHTS.institution : 0;
+  breakdown.institution = instPts;
+  score += instPts;
+
+  // Place of incident (NEW)
+  const placeSim = jaccardSimilarity(r1.place_of_incident, r2.place_of_incident);
+  const placePts = placeSim === 1 ? WEIGHTS.place
+    : placeSim >= 0.6 ? WEIGHTS.placePartial : 0;
+  breakdown.place = placePts;
+  score += placePts;
+
+  // Relationship type (NEW)
+  const relPts = r1.relationship_type === r2.relationship_type
+    ? WEIGHTS.relationship : 0;
+  breakdown.relationship = relPts;
+  score += relPts;
+
+  // Profession (NEW)
+  const profPts = r1.profession && r2.profession &&
+    normalize(r1.profession) === normalize(r2.profession)
+    ? WEIGHTS.profession : 0;
+  breakdown.profession = profPts;
+  score += profPts;
+
+  // Year proximity
+  const yearDiff = Math.abs(r1.incident_year - r2.incident_year);
+  const yearPts = yearDiff <= 2 ? WEIGHTS.year : 0;
+  breakdown.year = yearPts;
+  score += yearPts;
+
+  return { ...breakdown, total: score } as ScoreBreakdown;
+}
+
+export function isMatch(score: number): boolean {
+  return score >= THRESHOLD;
+}</pre>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /admin-view -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toast-icon"></span>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  DATA: City lists per country
+// ═══════════════════════════════════════════════════════
+const CITIES = {
+  AR: ['Buenos Aires','Córdoba','Rosario','Mendoza','La Plata','Tucumán','Mar del Plata','Salta','Santa Fe','San Juan','Otra ciudad'],
+  MX: ['Ciudad de México','Guadalajara','Monterrey','Puebla','Tijuana','León','Juárez','Zapopan','Otra ciudad'],
+  CL: ['Santiago','Valparaíso','Concepción','La Serena','Antofagasta','Temuco','Otra ciudad'],
+  CO: ['Bogotá','Medellín','Cali','Barranquilla','Cartagena','Bucaramanga','Otra ciudad'],
+  PE: ['Lima','Arequipa','Trujillo','Chiclayo','Cusco','Piura','Otra ciudad'],
+  UY: ['Montevideo','Salto','Paysandú','Las Piedras','Rivera','Otra ciudad'],
+  BO: ['La Paz','Santa Cruz','Cochabamba','Sucre','Oruro','Otra ciudad'],
+  PY: ['Asunción','Ciudad del Este','San Lorenzo','Luque','Capiatá','Otra ciudad'],
+  VE: ['Caracas','Maracaibo','Valencia','Barquisimeto','Maracay','Otra ciudad'],
+  EC: ['Quito','Guayaquil','Cuenca','Santo Domingo','Machala','Otra ciudad'],
+  BR: ['São Paulo','Rio de Janeiro','Brasília','Salvador','Fortaleza','Belo Horizonte','Otra ciudad'],
+  ES: ['Madrid','Barcelona','Valencia','Sevilla','Zaragoza','Málaga','Otra ciudad'],
+  US: ['Nueva York','Los Ángeles','Chicago','Houston','Phoenix','Filadelfia','Otra ciudad'],
+};
+
+function updateCities(countryCode) {
+  const sel = document.getElementById('f-city');
+  sel.innerHTML = '<option value="">Seleccionar ciudad...</option>';
+  const cities = CITIES[countryCode] || [];
+  cities.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c === 'Otra ciudad' ? 'other' : c;
+    opt.textContent = c;
+    sel.appendChild(opt);
+  });
+  if (!cities.length) {
+    sel.innerHTML = '<option value="other">Ingresar manualmente</option>';
+    document.getElementById('f-city-other').classList.add('visible');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  DROPDOWN "OTHER" TOGGLING
+// ═══════════════════════════════════════════════════════
+function toggleOther(selectEl, specId) {
+  const spec = document.getElementById(specId);
+  if (!spec) return;
+  const show = selectEl.value === 'other';
+  spec.classList.toggle('visible', show);
+  const inp = spec.querySelector('input');
+  if (inp) inp.required = show;
+}
+
+// ═══════════════════════════════════════════════════════
+//  AUTH NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showAuth(id) {
+  document.querySelectorAll('#auth-view > div').forEach(el => {
+    el.style.display = 'none';
+  });
+  const target = document.getElementById(id);
+  if (target) {
+    target.style.display = 'flex';
+    target.style.animation = 'none';
+    void target.offsetWidth;
+    target.style.animation = '';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  REGISTRATION STEPS
+// ═══════════════════════════════════════════════════════
+function setRegStep(active) {
+  [1,2,3,4].forEach(n => {
+    const s = document.getElementById('reg-s' + n);
+    const f = document.getElementById('reg-step-' + n);
+    if (!s || !f) return;
+    f.style.display = n === active ? 'block' : 'none';
+    s.className = 'step-item' + (n < active ? ' done' : n === active ? ' active' : '');
+  });
+}
+
+function regStep1() {
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  const pass2 = document.getElementById('reg-pass2').value;
+  if (!email || !email.includes('@')) { showToast('⚠️ Ingresá un correo válido', 'warning'); return; }
+  if (pass.length < 8) { showToast('⚠️ La contraseña debe tener al menos 8 caracteres', 'warning'); return; }
+  if (pass !== pass2)  { showToast('⚠️ Las contraseñas no coinciden', 'warning'); return; }
+  document.getElementById('reg-email-show').textContent = email;
+  setRegStep(2);
+  showToast('✉️ Código enviado a ' + email, 'success');
+}
+
+function regStep2() { setRegStep(3); }
+
+function regStep3() {
+  const consent = document.getElementById('reg-contact-consent');
+  // Consent optional at this stage — user can skip
+  setRegStep(4);
+  showToast('✅ Registro completado', 'success');
+}
+
+// ═══════════════════════════════════════════════════════
+//  APP NAVIGATION
+// ═══════════════════════════════════════════════════════
+function goToApp() {
+  document.getElementById('auth-view').style.display  = 'none';
+  document.getElementById('app-view').style.display   = 'flex';
+  document.getElementById('admin-view').style.display = 'none';
+  switchTab('dashboard');
+}
+
+function goToAdmin() {
+  document.getElementById('auth-view').style.display  = 'none';
+  document.getElementById('app-view').style.display   = 'none';
+  document.getElementById('admin-view').style.display = 'flex';
+  showToast('🔑 Sesión de administrador iniciada', 'info');
+}
+
+function logout() {
+  document.getElementById('auth-view').style.display  = 'block';
+  document.getElementById('app-view').style.display   = 'none';
+  document.getElementById('admin-view').style.display = 'none';
+  showAuth('login-page');
+  showToast('Sesión cerrada de forma segura', 'info');
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  if (!email || !pass) { showToast('⚠️ Ingresá tu correo y contraseña', 'warning'); return; }
+  showToast('🔐 Verificando credenciales...', 'info');
+  setTimeout(goToApp, 900);
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('#app-view .page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#app-view .nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('tab-' + tab);
+  if (page) page.classList.add('active');
+  document.querySelectorAll('#app-view .nav-item').forEach(n => {
+    const oc = n.getAttribute('onclick') || '';
+    if (oc.includes("'" + tab + "'")) n.classList.add('active');
+  });
+  window.scrollTo(0, 0);
+}
+
+function switchAdminTab(tab) {
+  document.querySelectorAll('#admin-view .page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#admin-view .nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('admin-tab-' + tab);
+  if (page) page.classList.add('active');
+  document.querySelectorAll('#admin-view .nav-item').forEach(n => {
+    const oc = n.getAttribute('onclick') || '';
+    if (oc.includes("'" + tab + "'")) n.classList.add('active');
+  });
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════════════════
+//  FORM VALIDATION & SUBMISSION
+// ═══════════════════════════════════════════════════════
+function submitReport(e) {
+  e.preventDefault();
+  const name  = document.getElementById('f-name').value.trim();
+  const place = document.getElementById('f-place').value.trim();
+  const year  = document.getElementById('f-year').value;
+  const rel   = document.getElementById('f-relationship').value;
+  const desc  = document.getElementById('f-description').value.trim();
+  const city  = document.getElementById('f-city').value;
+
+  const errors = [];
+  if (!name)  errors.push('Nombre completo');
+  if (!place) errors.push('Lugar específico del incidente');
+  if (!year)  errors.push('Año del incidente');
+  if (!rel)   errors.push('Tipo de vínculo');
+  if (!desc)  errors.push('Descripción del incidente');
+  if (!city)  errors.push('Ciudad');
+
+  // Check "other" fields
+  const relSel = document.getElementById('f-relationship');
+  if (relSel.value === 'other') {
+    const otherInp = document.querySelector('#f-relationship-other input');
+    if (!otherInp || !otherInp.value.trim()) errors.push('Especificación del vínculo');
+  }
+
+  if (errors.length) {
+    showToast('⚠️ Faltan campos: ' + errors.join(', '), 'warning');
+    return;
+  }
+
+  showToast('🔒 Cifrando testimonio con AES-256...', 'info');
+  setTimeout(() => {
+    showToast('✅ Reporte enviado de forma segura', 'success');
+    switchTab('my-reports');
+  }, 1400);
+}
+
+// ═══════════════════════════════════════════════════════
+//  LAWYER FLOW
+// ═══════════════════════════════════════════════════════
+function acceptLawyer() {
+  const consent = document.getElementById('chk-lawyer-consent');
+  if (consent && !consent.checked) {
+    showToast('⚠️ Por favor confirmá el consentimiento de contacto antes de continuar', 'warning');
+    return;
+  }
+  const el1 = document.getElementById('lawyer-choice');
+  const el2 = document.getElementById('lawyer-accepted');
+  if (el1) el1.style.display = 'none';
+  if (el2) { el2.style.display = 'block'; }
+  showToast('✅ Solicitud enviada. Un abogado verificado te contactará pronto.', 'success');
+  // Also update dashboard notification
+  switchTab('notifications');
+}
+
+function declineLawyer() {
+  const el1 = document.getElementById('lawyer-choice');
+  const el2 = document.getElementById('lawyer-declined');
+  if (el1) el1.style.display = 'none';
+  if (el2) el2.style.display = 'block';
+  showToast('Decisión guardada. Podés cambiarla en cualquier momento.', 'info');
+}
+
+// ═══════════════════════════════════════════════════════
+//  ADMIN ACTIONS
+// ═══════════════════════════════════════════════════════
+function approveMatch(id) {
+  const actions = document.getElementById('queue-actions-' + id);
+  const result  = document.getElementById('queue-result-' + id);
+  if (actions) actions.style.display = 'none';
+  if (result) {
+    result.style.display = 'block';
+    result.innerHTML = `
+      <div class="alert alert-success">
+        <span class="alert-icon">✅</span>
+        <div><strong>Coincidencia aprobada.</strong> Los usuarios serán notificados de forma confidencial. Ninguna víctima verá la identidad de la otra. Acción registrada en auditoría.</div>
+      </div>
+      <span class="badge badge-approved" style="font-size:14px;">Aprobada</span>
+    `;
+  }
+  addAuditEntry('Aprobó coincidencia #M1', 'APR');
+  showToast('✅ Coincidencia aprobada. Usuarios notificados de forma confidencial.', 'success');
+}
+
+function rejectMatch(id) {
+  const actions = document.getElementById('queue-actions-' + id);
+  const result  = document.getElementById('queue-result-' + id);
+  if (actions) actions.style.display = 'none';
+  if (result) {
+    result.style.display = 'block';
+    result.innerHTML = `
+      <div class="alert alert-danger">
+        <span class="alert-icon">✕</span>
+        <div><strong>Coincidencia rechazada.</strong> No se notifica a los usuarios. Acción registrada en auditoría.</div>
+      </div>
+      <span class="badge badge-rejected" style="font-size:14px;">Rechazada</span>
+    `;
+  }
+  addAuditEntry('Rechazó coincidencia #M1', 'REJ');
+  showToast('Coincidencia rechazada. Acción registrada.', 'info');
+}
+
+function addAuditEntry(action, result) {
+  const log = document.getElementById('audit-log');
+  if (!log) return;
+  const badgeClass = result === 'APR' ? 'badge-approved' : result === 'REJ' ? 'badge-rejected' : 'badge-pending';
+  const now = new Date();
+  const ts = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const row = document.createElement('div');
+  row.className = 'data-table-row';
+  row.style.cssText = 'grid-template-columns:1.5fr 1fr 3fr 1fr;animation:pageIn 0.3s ease;';
+  row.innerHTML = `
+    <span class="mono" style="font-size:13px;color:var(--text-muted);">${ts}</span>
+    <span>Rev.01</span>
+    <span style="color:var(--text-muted);">${action}</span>
+    <span class="badge ${badgeClass}">${result}</span>
+  `;
+  log.insertBefore(row, log.firstChild);
+}
+
+function confirmDelete() {
+  if (confirm('¿Estás segura? Esta acción es irreversible. Tu información personal y de contacto será eliminada permanentemente.')) {
+    showToast('🗑 Cuenta eliminada. Datos personales borrados.', 'info');
+    setTimeout(logout, 1800);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════
+let toastTimer;
+const toastBorders = {
+  info:    'var(--info-border)',
+  success: 'var(--success-border)',
+  warning: 'var(--warning-border)',
+  error:   'var(--danger-border)',
+};
+const toastIcons = { info:'ℹ️', success:'✅', warning:'⚠️', error:'❌' };
+
+function showToast(msg, type = 'info') {
+  const t  = document.getElementById('toast');
+  const ti = document.getElementById('toast-icon');
+  const tm = document.getElementById('toast-msg');
+  ti.textContent = toastIcons[type] || 'ℹ️';
+  tm.textContent = msg;
+  t.style.borderColor = toastBorders[type] || 'var(--border)';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3800);
+}
+
+// ═══════════════════════════════════════════════════════
+//  FOCUS ENHANCEMENT
+// ═══════════════════════════════════════════════════════
+document.addEventListener('focusin', e => {
+  const tags = ['INPUT','SELECT','TEXTAREA'];
+  if (tags.includes(e.target.tagName)) {
+    e.target.style.borderColor = 'var(--border-focus)';
+  }
+});
+document.addEventListener('focusout', e => {
+  const tags = ['INPUT','SELECT','TEXTAREA'];
+  if (tags.includes(e.target.tagName)) {
+    e.target.style.borderColor = 'var(--border)';
+    e.target.style.boxShadow = 'none';
+  }
+});
+
+// Init register form
+setRegStep(1);
+</script>
+</body>
+</html>
